@@ -1,0 +1,10 @@
+import { check, header } from "express-validator";
+
+export const otpVerifyValidator = [
+    header('token').trim().escape().not().isEmpty().withMessage('token is not found in header').isString(),
+    check('otp').trim().escape().not().isEmpty().withMessage('otp token is required').isString()
+]
+export const otpResendValidator = [
+    header('token').trim().escape().not().isEmpty().withMessage('token is not found in header').isString(),
+    check('otp').trim().escape().not().isEmpty().withMessage('otp token is required').isString()
+]
