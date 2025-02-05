@@ -3,10 +3,9 @@ import AppError from '../../error/AppError';
 import { ISubscriptions } from './subscription.interface';
 import Subscription from './subscription.models';
 import { Types } from 'mongoose';
-import { User } from '../user/user.models';
 import Package from '../package/package.model';
-import { USER_ROLE } from '../user/user.constants';
 import Access_comments from '../access_comments/access_comments.model';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 const createSubscription = async (payload: { package: string }, userId: string) => {
   // Check if a similar subscription exists
@@ -81,25 +80,25 @@ const createSubscription = async (payload: { package: string }, userId: string) 
 };
 
 const getAllSubscription = async (query: Record<string, any>) => {
-  // const subscriptionsModel = new QueryBuilder(
-  //   Subscription.find().populate(['package', 'user']),
-  //   query,
-  // )
-  //   .search([])
-  //   .filter()
-  //   .paginate()
-  //   .sort()
-  //   .fields();
+  const subscriptionsModel = new QueryBuilder(
+    Subscription.find({isPaid : true}).populate(['package', 'user']),
+    query,
+  )
+    .search([])
+    .filter()
+    .paginate()
+    .sort()
+    .fields();
 
-  // subscriptionsModel.modelQuery =
-  //   subscriptionsModel.modelQuery.sort('createdAt');
+  subscriptionsModel.modelQuery =
+    subscriptionsModel.modelQuery.sort('createdAt');
 
-  // const data = await subscriptionsModel.modelQuery;
-  // const meta = await subscriptionsModel.countTotal();
-  // return {
-  //   data,
-  //   meta,
-  // };
+  const data = await subscriptionsModel.modelQuery;
+  const meta = await subscriptionsModel.countTotal();
+  return {
+    data,
+    meta,
+  };
 };
 
 const getSubscriptionById = async (userId: string) => {

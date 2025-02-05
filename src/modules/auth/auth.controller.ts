@@ -53,6 +53,16 @@ const loginUser = catchAsync(async (req: Request<{}, {}, { email: string, passwo
     });
 })
 
+const adminLogin = catchAsync(async (req: Request<{}, {}, { email: string, password: string }>, res: Response) => {
+    const result = await authService.adminLogin(req.body)
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Logged in successfully',
+        data: result,
+    });
+})
+
 // change password
 const changePassword = catchAsync(async (req: Request, res: Response) => {
     const result = await authService.changePassword(req?.user?._id, req.body);
@@ -117,6 +127,7 @@ export const authController = {
     createUser,
     createGuestUser,
     loginUser,
+    adminLogin,
     changePassword,
     resetPassword,
     forgotPassword,

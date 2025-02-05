@@ -168,9 +168,6 @@ const confirmPayment = async (query: Record<string, any>) => {
 
       if (packageDetails?.plan_type == 'premium') {
         plan = 'premium'
-        accessCycle = 'all'
-      } else {
-        accessCycle = prevAccess_comment?.plans.standard?.accessCycle || 'all'
       }
 
       await Access_comments.findOneAndUpdate(
@@ -181,7 +178,7 @@ const confirmPayment = async (query: Record<string, any>) => {
         },
         { upsert: true, new: true, session },
       );
-      
+
 
 
     }

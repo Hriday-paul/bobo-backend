@@ -65,15 +65,15 @@ const createGuestUser = async (payload: { email: string }) => {
 // Login
 const loginUser = async (payload: { email: string, password: string }) => {
 
-    const user: IUser | null = await User.findOne({ email: payload?.email });
+    const user: IUser | null = await User.findOne({ email: payload?.email, role: { $ne: '5' } });
 
     if (!user) {
         // If user not found, throw error
         throw new AppError(httpStatus.NOT_FOUND, 'User not found');
     } else {
-        // if (user?.isDeleted) {
-        //     throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted');
-        // }
+        if (!user?.status) {
+            throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked');
+        }
 
 
         // Handle verify password
@@ -87,6 +87,60 @@ const loginUser = async (payload: { email: string, password: string }) => {
         if (!user?.isverified) {
             throw new AppError(httpStatus.FORBIDDEN, 'Your account is not verified');
         }
+
+
+    }
+
+    const jwtPayload: { userId: string; role: string } = {
+        userId: user?._id?.toString() as string,
+        role: user?.role,
+    };
+
+    const accessToken = createToken(
+        jwtPayload,
+        config.jwt_access_secret as string,
+        60 * 60 * 24 * 30, //30 days
+    );
+
+    const refreshToken = createToken(
+        jwtPayload,
+        config.jwt_refresh_secret as string,
+        60 * 60 * 24 * 365,
+    );
+
+    return {
+        user,
+        accessToken,
+        refreshToken,
+    };
+};
+
+//admin login
+const adminLogin = async (payload: { email: string, password: string }) => {
+
+    const user: IUser | null = await User.findOne({ email: payload?.email, role : '5' });
+
+    if (!user) {
+        // If user not found, throw error
+        throw new AppError(httpStatus.NOT_FOUND, 'admin not found');
+    } else {
+        if (user?.isDeleted) {
+            throw new AppError(httpStatus.FORBIDDEN, 'Admin not found');
+        }
+
+
+        // Handle verify password
+        const passwordMatched = await bcrypt.compare(payload?.password, user?.password);
+
+        if (!passwordMatched) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'Password does not match');
+        }
+
+
+        if (!user?.isverified) {
+            throw new AppError(httpStatus.FORBIDDEN, 'Your account is not verified');
+        }
+
     }
 
     const jwtPayload: { userId: string; role: string } = {
@@ -300,7 +354,6 @@ const refreshToken = async (token: string) => {
 // Forgot password
 const sendEmailRegisterForm = async (email: string, firstName: string, lastName: string) => {
 
-
     const otpEmailPath = path.join(
         __dirname,
         '../../public/view/form_link_send.html',
@@ -308,10 +361,10 @@ const sendEmailRegisterForm = async (email: string, firstName: string, lastName:
 
     await sendEmail(
         email,
-        'Your reset password OTP is',
+        'Teacher Register form link',
         fs
             .readFileSync(otpEmailPath, 'utf8')
-            .replace('{{link}}', (config.client_Url + '/en/admin/signup'))
+            .replace('{{link}}', (config.client_Url + '/en/schoolAccountAuth/schoolRegister'))
             .replace('{{firstName}}', firstName)
             .replace('{{lastName}}', lastName)
     );
@@ -335,5 +388,6 @@ export const authService = {
     changePassword,
     resetPassword,
     refreshToken,
-    sendEmailRegisterForm
+    sendEmailRegisterForm,
+    adminLogin
 }

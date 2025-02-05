@@ -1,3 +1,4 @@
+import QueryBuilder from "../../builder/QueryBuilder";
 import AppError from "../../error/AppError";
 import { IUser } from "./user.interface";
 import { User } from "./user.models";
@@ -30,6 +31,21 @@ const updateProfile = async (payload: IUser, userId: string, image: string) => {
 
 }
 
+//get all users
+const allUsers = async (query: Record<string, any>) => {
+    const userModel = new QueryBuilder(User.find({ role: { $ne: '5' } }), query)
+        .search(['name', 'email', 'contact', 'school'])
+        .filter()
+        .paginate()
+        .sort();
+    const data: any = await userModel.modelQuery;
+    const meta = await userModel.countTotal();
+    return {
+        data,
+        meta,
+    };
+}
+
 
 const getUserById = async (id: string) => {
     const result = await User.findById(id, { password: 0, verification: 0 });
@@ -38,7 +54,7 @@ const getUserById = async (id: string) => {
 
 
 //adTeacher
-const addTeacher = async (payload: {email : string, name : string}, userId: string) => {
+const addTeacher = async (payload: { email: string, name: string }, userId: string) => {
 
     const isExist = await User.findOne({ email: payload?.email });
 
@@ -50,19 +66,70 @@ const addTeacher = async (payload: {email : string, name : string}, userId: stri
         );
     }
 
-    const user = await User.create({ email: payload.email, role: '4', school_admin: userId, name : payload.name });
+    const user = await User.create({ email: payload.email, role: '4', school_admin: userId, name: payload.name });
 
     if (!user) {
         throw new AppError(httpStatus.BAD_REQUEST, 'Teacher creation failed');
     }
 
     return user;
-
 };
+
+const mySchoolTeachers = async (query: Record<string, any>, userId: string) => {
+
+    const userModel = new QueryBuilder(User.find({ role: "4", school_admin: userId }), query)
+        .search(['name', 'email', 'contact', 'school'])
+        .filter()
+        .paginate()
+        .sort();
+    const data: any = await userModel.modelQuery;
+    const meta = await userModel.countTotal();
+    return {
+        data,
+        meta,
+    };
+    // return await User.find({ $or: [ { name: /sss/i } ] })
+}
+
+const deleteSchool_teacher = async (id: string, userId: string) => {
+    const isExist = await User.findById(id);
+
+    if (!isExist) {
+        throw new AppError(
+            httpStatus.FORBIDDEN,
+            'Teacher not found',
+        );
+    }
+
+    if ((!isExist?.school_admin.equals(userId)) && isExist.role !== '4') {
+        throw new AppError(
+            httpStatus.FORBIDDEN,
+            'Teacher is not your school',
+        );
+    }
+
+    const deleted = await User.deleteOne({ _id: id })
+
+    return deleted
+
+}
+
+//user status update
+const status_update_user = async (payload: { status: boolean }, id: string) => {
+
+    const result = await User.updateOne({ _id: id }, { status: payload?.status })
+
+    return result
+}
+
 
 
 export const userService = {
     updateProfile,
     getUserById,
-    addTeacher
+    allUsers,
+    addTeacher,
+    deleteSchool_teacher,
+    mySchoolTeachers,
+    status_update_user
 }

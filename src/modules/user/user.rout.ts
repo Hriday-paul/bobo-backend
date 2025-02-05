@@ -4,7 +4,7 @@ import auth from "../../middleware/auth";
 import { USER_ROLE } from "./user.constants";
 import parseData from "../../middleware/parseData";
 import { userController } from "./user.controller";
-import { addSchoolTeacherValidator } from "./user.validator";
+import { addSchoolTeacherValidator, statusUpdateValidator } from "./user.validator";
 import req_validator from "../../middleware/req_validation";
 
 const router = Router();
@@ -26,6 +26,20 @@ const single_image_Upload = multer({
 }).single('image');
 
 
+router.get(
+    '/',
+    auth(USER_ROLE.admin),
+    userController.all_users,
+);
+router.patch(
+    '/status/:id',
+    statusUpdateValidator,
+    req_validator(),
+    auth(USER_ROLE.admin),
+    userController.update_user_status,
+);
+
+
 router.patch(
     '/update-my-profile',
     auth(USER_ROLE.individual_teacher, USER_ROLE.school_admin, USER_ROLE.school_teacher),
@@ -39,15 +53,27 @@ router.get(
     '/my-profile',
     auth(USER_ROLE.guest_user, USER_ROLE.individual_teacher, USER_ROLE.school_admin, USER_ROLE.school_teacher),
     userController.getMyProfile,
-  );
+);
 
 router.post(
     '/add-school-teacher',
     addSchoolTeacherValidator,
     req_validator(),
-    auth(USER_ROLE.school_teacher),
+    auth(USER_ROLE.school_admin),
     userController.addTeacher,
-  );
+);
 
+router.delete(
+    '/school-teacher/:id',
+    req_validator(),
+    auth(USER_ROLE.school_admin),
+    userController.deleteSchoolTeacher,
+);
+
+router.get(
+    '/school-teachers',
+    auth(USER_ROLE.school_admin),
+    userController.mySchoolTeachers,
+);
 
 export const userRoutes = router;

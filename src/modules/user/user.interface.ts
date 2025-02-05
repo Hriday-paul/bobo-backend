@@ -11,12 +11,13 @@ export interface IUser {
   job_role?: string;
   school?: string
   isverified: boolean
-  role: "1" | "2" | "3" | "4"; //1 for guest user, 2 for individual teacher, 3 for school admin & 4 for school teacher
+  role: "1" | "2" | "3" | "4" | "5"; //1 for guest user, 2 for individual teacher, 3 for school admin & 4 for school teacher
   school_admin: Types.ObjectId //if user is school teacher, set school admin id,
   verification: {
     otp: string | number;
     expiresAt: Date;
     status: boolean;
   };
+  isDeleted : boolean
 }
 

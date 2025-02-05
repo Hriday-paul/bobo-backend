@@ -1,10 +1,22 @@
-import { Request, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import catchAsync from "../../utils/catchAsync";
 import { uploadToS3 } from "../../utils/s3";
 import { userService } from "./user.service";
 import { IUser } from "./user.interface";
 import sendResponse from "../../utils/sendResponse";
 import httpStatus from 'http-status'
+
+//get all users
+const all_users = catchAsync(async (req: Request, res: Response) => {
+    const query = req.query
+    const result = await userService.allUsers(query)
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Users retrive successfully',
+        data: result,
+    });
+})
 
 const updateProfile = catchAsync(async (req: Request<{}, {}, IUser>, res: Response) => {
     let image;
@@ -50,8 +62,48 @@ const addTeacher = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const deleteSchoolTeacher = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id
+    const result = await userService.deleteSchool_teacher(id, req.user._id)
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'School Teacher deleted successfully',
+        data: result,
+    });
+})
+
+const mySchoolTeachers = catchAsync(async (req: Request, res: Response) => {
+    const query = req.query
+    const result = await userService.mySchoolTeachers(query, req.user._id)
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'School Teacher get successfully',
+        data: result,
+    });
+})
+
+// status update user
+const update_user_status: RequestHandler<{ id: string }, {}, { status: boolean }> = catchAsync(async (req, res) => {
+
+    const result = await userService.status_update_user(req.body, req.params.id)
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'status updated successfully',
+        data: result,
+    });
+
+})
+
 export const userController = {
     updateProfile,
     getMyProfile,
-    addTeacher
+    addTeacher,
+    all_users,
+    deleteSchoolTeacher,
+    update_user_status,
+    mySchoolTeachers
 }

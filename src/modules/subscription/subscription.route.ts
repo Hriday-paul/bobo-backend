@@ -46,10 +46,10 @@ router.post(
 //   subscriptionController.getSubscriptionById,
 // );
 
-// router.get(
-//   '/',
-//   auth(USER_ROLE.admin),
-//   subscriptionController.getAllSubscription,
-// );
+router.get(
+  '/',
+  // auth(USER_ROLE.admin),
+  subscriptionController.getAllSubscription,
+);
 
 export const subscriptionRoutes = router;

@@ -27,6 +27,12 @@ router.post('/login',
     authController.loginUser
 )
 
+router.post('/admin/login',
+    loginAccountValidator,
+    req_validator(),
+    authController.adminLogin
+)
+
 router.patch(
     '/change-password',
     changePasswordValidator,

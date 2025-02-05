@@ -107,7 +107,7 @@ const checkAccess = async (
     cycle: string
 ): Promise<{ usedPlan: string; accessCycle: string }> => {
 
-    
+
     const userAccess = await Access_comments.findOne({ user: userId });
 
     if (!userAccess) {
@@ -118,14 +118,14 @@ const checkAccess = async (
     }
 
     let usedPlan = 'premium';
-    let accessCycle = 'all'
+    let errMsg = ''
 
     //check user role is 1 and his free comment limit is finish or not
     if (role == '1') {
         if (userAccess.plans.free?.comment_generate_limit && userAccess.plans.free?.comment_generated) {
             if (userAccess.plans.free?.comment_generate_limit > userAccess.plans.free?.comment_generated) {
                 usedPlan = 'free'
-                return { usedPlan, accessCycle }
+                return { usedPlan, accessCycle: 'all' }
             }
             else {
                 throw new AppError(
@@ -146,15 +146,29 @@ const checkAccess = async (
         if (userAccess.plans.standard?.comment_generate_limit > userAccess.plans.standard?.comment_generated) {
             if ((userAccess.plans.standard?.accessCycle !== 'all')) {
                 if (userAccess.plans.standard?.accessCycle !== cycle) {
-                    throw new AppError(
-                        httpStatus.FORBIDDEN,
-                        `You can access only cycle ${userAccess.plans.standard?.accessCycle}`,
-                    );
+                    // check user have a premium plan with expire date and comment generate limit
+                    if (userAccess.plans.premium?.expiredAt && (new Date(userAccess.plans.premium?.expiredAt) > new Date())) {
+                        if (userAccess.plans.premium?.comment_generate_limit > userAccess.plans.premium?.comment_generated) {
+                            usedPlan = 'premium'
+                            return { usedPlan, accessCycle: 'all' }
+                        }
+                        else {
+                            throw new AppError(
+                                httpStatus.FORBIDDEN,
+                                `You can access only cycle ${userAccess.plans.standard?.accessCycle}`,
+                            );
+                        }
+                    }
+                    else {
+                        throw new AppError(
+                            httpStatus.FORBIDDEN,
+                            `You can access only cycle ${userAccess.plans.standard?.accessCycle}`,
+                        );
+                    }
                 }
             }
             usedPlan = 'standard'
-            accessCycle = userAccess.plans.standard?.accessCycle
-            return { usedPlan, accessCycle }
+            return { usedPlan, accessCycle: cycle }
         }
     }
 

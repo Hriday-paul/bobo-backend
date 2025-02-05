@@ -9,7 +9,7 @@ const generate_comment = catchAsync(async (req: Request<{}, {}, { feedbackData: 
 
     const { usedPlan, accessCycle } = await access_commentsService.checkAccess(req.user._id, req.user.role, req.body.cycle)
 
-    const result = await access_commentsService.generate_comment(req.body);
+    // const result = await access_commentsService.generate_comment(req.body);
 
     // incremnt by 1 comment_generated
     await Access_comments.findOneAndUpdate(
@@ -24,7 +24,7 @@ const generate_comment = catchAsync(async (req: Request<{}, {}, { feedbackData: 
         statusCode: httpStatus.OK,
         success: true,
         message: 'Comment generated successfully',
-        data: { comment: result },
+        data: { comment: "result" },
     });
 })
 
