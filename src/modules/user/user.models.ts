@@ -47,7 +47,7 @@ const userSchema: Schema<IUser> = new Schema(
     role: {
       type: String,
       required: true,
-      enum: ['1', '2', '3', '4', '5'], //2 for individual teacher, 3 for school admin & 4 for 
+      enum: ['1', '2', '3', '4', '5', '6'], //2 for individual teacher, 3 for school admin & 4 for school teacher & 5 for admin & 6 for sub admin
       default: '1'
     },
     school_admin: {

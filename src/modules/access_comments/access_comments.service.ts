@@ -107,7 +107,6 @@ const checkAccess = async (
     cycle: string
 ): Promise<{ usedPlan: string; accessCycle: string }> => {
 
-
     const userAccess = await Access_comments.findOne({ user: userId });
 
     if (!userAccess) {
@@ -137,6 +136,25 @@ const checkAccess = async (
             throw new AppError(
                 httpStatus.FORBIDDEN,
                 'Your free limit is expired!',
+            );
+        }
+    }
+
+    if (role == '3' || role == '4') {
+        if (userAccess.plans.premium?.expiredAt && (new Date(userAccess.plans.premium?.expiredAt) > new Date())) {
+            if (userAccess.plans.premium?.comment_generate_limit > userAccess.plans.premium?.comment_generated) {
+                usedPlan = 'premium'
+                return { usedPlan, accessCycle: 'all' }
+            } else {
+                throw new AppError(
+                    httpStatus.FORBIDDEN,
+                    'Your School comment generate limit expired !',
+                );
+            }
+        } else {
+            throw new AppError(
+                httpStatus.FORBIDDEN,
+                'Your School subscription expired !',
             );
         }
     }

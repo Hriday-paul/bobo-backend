@@ -81,7 +81,7 @@ const createSubscription = async (payload: { package: string }, userId: string) 
 
 const getAllSubscription = async (query: Record<string, any>) => {
   const subscriptionsModel = new QueryBuilder(
-    Subscription.find({isPaid : true}).populate(['package', 'user']),
+    Subscription.find({ isPaid: true }).populate(['package', 'user']),
     query,
   )
     .search([])
@@ -100,6 +100,35 @@ const getAllSubscription = async (query: Record<string, any>) => {
     meta,
   };
 };
+
+
+
+//my subscriptions
+const myRunningSubscriptions = async (userId: string) => {
+
+  let response = []
+  const result = await Access_comments.findOne({ user: userId }).lean();
+
+  if (result) {
+    if (result.plans.premium?.expiredAt && (new Date(result.plans.premium?.expiredAt) > new Date())) {
+      if (result.plans.premium?.comment_generate_limit > result.plans.premium?.comment_generated) {
+        response.push({ ...result.plans.premium, plan: 'premium' })
+      }
+    }
+
+    if (result.plans.standard?.expiredAt && (new Date(result.plans.standard?.expiredAt) > new Date())) {
+      if (result.plans.standard?.comment_generate_limit > result.plans.standard?.comment_generated) {
+        response.push({ ...result.plans.standard, plan: 'standard' })
+      }
+    }
+
+  }
+
+  return response
+}
+
+
+
 
 const getSubscriptionById = async (userId: string) => {
   const result = await Subscription.findOne({
@@ -152,4 +181,5 @@ export const subscriptionService = {
   updateSubscription,
   deleteSubscription,
   getSubscriptionByUserId,
+  myRunningSubscriptions
 };

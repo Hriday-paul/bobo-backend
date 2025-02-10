@@ -2,8 +2,11 @@ import { Request, Response } from 'express';
 import catchAsync from '../../utils/catchAsync';
 import { subscriptionService } from './subscription.service';
 import sendResponse from '../../utils/sendResponse';
+import { User } from '../user/user.models';
+import AppError from '../../error/AppError';
+import httpStatus from 'http-status'
 
-const createSubscription = catchAsync(async (req: Request<{},{}, {package : string}>, res: Response) => {
+const createSubscription = catchAsync(async (req: Request<{}, {}, { package: string }>, res: Response) => {
   // req.body.user = req?.user?._id;
   console.log(req?.user._id)
   const result = await subscriptionService.createSubscription(req.body, req?.user._id);
@@ -24,6 +27,31 @@ const getAllSubscription = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+// my running subscriptions
+const my_running_subscriptions = catchAsync(async (req, res) => {
+  let user_Id = req.user._id
+
+  if (req.user.role == '4') {
+    const user = await User.findById(req.user._id)
+    if (!user?.school_admin) {
+      throw new AppError(
+        httpStatus.NOT_FOUND,
+        'School admin not found',
+      );
+    }
+    user_Id = user?.school_admin.toString();
+  }
+
+  const result = await subscriptionService.myRunningSubscriptions(user_Id)
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'My current subscription retrive successfully',
+    data: result,
+  });
+})
 
 const getMySubscription = catchAsync(async (req: Request, res: Response) => {
   // const result = await subscriptionService.getSubscriptionByUserId(
@@ -94,4 +122,5 @@ export const subscriptionController = {
   updateSubscription,
   deleteSubscription,
   getMySubscription,
+  my_running_subscriptions
 };

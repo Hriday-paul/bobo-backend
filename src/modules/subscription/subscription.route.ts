@@ -16,6 +16,12 @@ router.post(
   subscriptionController.createSubscription,
 );
 
+router.get(
+  '/my-subscription',
+  auth(USER_ROLE.individual_teacher, USER_ROLE.school_admin, USER_ROLE.school_teacher),
+  subscriptionController.my_running_subscriptions,
+);
+
 // router.patch(
 //   '/:id',
 //   auth(USER_ROLE.dealer),

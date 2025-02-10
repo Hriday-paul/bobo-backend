@@ -4,16 +4,31 @@ import { access_commentsService } from "./access_comments.service";
 import sendResponse from "../../utils/sendResponse";
 import httpStatus from "http-status"
 import Access_comments from "./access_comments.model";
+import { User } from "../user/user.models";
+import AppError from "../../error/AppError";
 
 const generate_comment = catchAsync(async (req: Request<{}, {}, { feedbackData: any, language: string, cycle: string }>, res: Response) => {
 
-    const { usedPlan, accessCycle } = await access_commentsService.checkAccess(req.user._id, req.user.role, req.body.cycle)
+    let user_Id = req.user._id
 
-    // const result = await access_commentsService.generate_comment(req.body);
+    if (req.user.role == '4') {
+        const user = await User.findById(req.user._id)
+        if (!user?.school_admin) {
+            throw new AppError(
+                httpStatus.NOT_FOUND,
+                'School admin not found',
+            );
+        }
+        user_Id = user?.school_admin.toString();
+    }
+
+    const { usedPlan, accessCycle } = await access_commentsService.checkAccess(user_Id, req.user.role, req.body.cycle)
+
+    const result = await access_commentsService.generate_comment(req.body);
 
     // incremnt by 1 comment_generated
     await Access_comments.findOneAndUpdate(
-        { user: req?.user?._id },
+        { user: user_Id },
         {
             $set: { [`plans.${usedPlan}.accessCycle`]: accessCycle },
             $inc: { [`plans.${usedPlan}.comment_generated`]: 1 }
@@ -24,7 +39,7 @@ const generate_comment = catchAsync(async (req: Request<{}, {}, { feedbackData: 
         statusCode: httpStatus.OK,
         success: true,
         message: 'Comment generated successfully',
-        data: { comment: "result" },
+        data: { comment: result },
     });
 })
 

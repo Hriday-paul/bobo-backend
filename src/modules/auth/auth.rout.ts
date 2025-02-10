@@ -37,7 +37,7 @@ router.patch(
     '/change-password',
     changePasswordValidator,
     req_validator(),
-    auth(USER_ROLE.individual_teacher, USER_ROLE.school_admin, USER_ROLE.school_teacher),
+    auth(USER_ROLE.individual_teacher, USER_ROLE.school_admin, USER_ROLE.school_teacher, USER_ROLE.admin, USER_ROLE.sub_admin),
     authController.changePassword,
 );
 
@@ -56,8 +56,8 @@ router.post(
 
 router.post(
     '/resend-otp',
-    // otpResendValidator,
-    // req_validator(),
+    otpResendValidator,
+    req_validator(),
     otpControllers.resendOtp,
 );
 

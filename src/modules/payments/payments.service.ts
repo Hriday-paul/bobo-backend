@@ -160,23 +160,40 @@ const confirmPayment = async (query: Record<string, any>) => {
       // );
 
 
+      const prevAccess_comment = await Access_comments.findOne({ user: user?._id });
 
-      let plan = "standard"
-      let accessCycle: string = 'all'
 
-      const prevAccess_comment = await Access_comments.findOne({ user: user?._id })
+      let plan: "standard" | "premium" = "standard";
+      let accessCycle: string = "all";
 
-      if (packageDetails?.plan_type == 'premium') {
-        plan = 'premium'
+      if (packageDetails?.plan_type === "premium") {
+        plan = "premium";
       }
+
+      let comment_generated = prevAccess_comment?.plans?.[plan]?.comment_generated || 0;
+      let comment_generat_limit = (prevAccess_comment?.plans?.[plan]?.comment_generate_limit || 0) + packageDetails.comment_limit;
+
+
+      const planData = prevAccess_comment?.plans?.[plan];
+
+      if (planData?.expiredAt && new Date(planData.expiredAt) <= new Date()) {
+        comment_generated = 0;
+        comment_generat_limit = packageDetails.comment_limit || 0;
+      }
+
+      // if (Number(`${prevAccess_comment}.plans.${plan}.comment_generated`) > 0) {
+      //   comment_generated = prevAccess_comment?.plans?.[plan]?.comment_generated || 0
+      // }
 
       await Access_comments.findOneAndUpdate(
         { user: user?._id },
         {
-          $set: { [`plans.${plan}.accessCycle`]: accessCycle, [`plans.${plan}.expiredAt`]: subscription?.expiredAt },
-          $inc: { [`plans.${plan}.comment_generate_limit`]: packageDetails.comment_limit }
+          $set: { [`plans.${plan}.accessCycle`]: accessCycle, [`plans.${plan}.expiredAt`]: subscription?.expiredAt, [`plans.${plan}.comment_generated`]: comment_generated, [`plans.${plan}.comment_generate_limit`]: comment_generat_limit }, //prevAccess_comment?.plans?.[plan]?.comment_generated || 0
+          // $inc: {
+          //   [`plans.${plan}.comment_generate_limit`]: packageDetails.comment_limit,
+          // }
         },
-        { upsert: true, new: true, session },
+        { upsert: true, session },
       );
 
 

@@ -18,18 +18,7 @@ const verifyOtp = catchAsync(async (req: Request, res: Response) => {
 });
 
 const resendOtp = catchAsync(async (req: Request, res: Response) => {
-  const token = req?.headers?.token as string;
-  const decoded = jwtDecode(token) as { email: string };
-
-  if (!decoded?.email) {
-    
-    throw new AppError(
-      httpStatus.NOT_FOUND,
-      'Token not found',
-    );
-  }
-
-  const result = await otpServices.resendOtp(decoded?.email);
+  const result = await otpServices.resendOtp(req?.body?.email);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

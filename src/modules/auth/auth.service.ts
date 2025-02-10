@@ -85,9 +85,8 @@ const loginUser = async (payload: { email: string, password: string }) => {
 
 
         if (!user?.isverified) {
-            throw new AppError(httpStatus.FORBIDDEN, 'Your account is not verified');
+            throw new AppError(httpStatus.BAD_REQUEST, 'Your account is not verified');
         }
-
 
     }
 
@@ -118,7 +117,7 @@ const loginUser = async (payload: { email: string, password: string }) => {
 //admin login
 const adminLogin = async (payload: { email: string, password: string }) => {
 
-    const user: IUser | null = await User.findOne({ email: payload?.email, role : '5' });
+    const user: IUser | null = await User.findOne({ email: payload?.email, role: { $in: ['5', '6'] } });
 
     if (!user) {
         // If user not found, throw error

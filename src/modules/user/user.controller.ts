@@ -5,6 +5,8 @@ import { userService } from "./user.service";
 import { IUser } from "./user.interface";
 import sendResponse from "../../utils/sendResponse";
 import httpStatus from 'http-status'
+import { User } from "./user.models";
+import AppError from "../../error/AppError";
 
 //get all users
 const all_users = catchAsync(async (req: Request, res: Response) => {
@@ -52,12 +54,25 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
 
 //add teacher
 const addTeacher = catchAsync(async (req: Request, res: Response) => {
-    const reqBody = { email: req?.body.email, name: req.body.firstName + req.body.lastName }
+    const reqBody = { email: req?.body.email, name: req.body.firstName + req.body.lastName, password: req?.body?.password }
     const result = await userService.addTeacher(reqBody, req.user._id);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: 'School Teacher created successfully',
+        data: result,
+    });
+});
+
+
+//update teacher
+const updateTeacherById = catchAsync(async (req: Request, res: Response) => {
+    const reqBody = { name: req.body.firstName + req.body.lastName, status: req.body?.status }
+    const result = await userService.updateSchoolTeacher(reqBody, req.params.id, req.user._id);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'School Teacher update successfully',
         data: result,
     });
 });
@@ -86,17 +101,50 @@ const mySchoolTeachers = catchAsync(async (req: Request, res: Response) => {
 
 // status update user
 const update_user_status: RequestHandler<{ id: string }, {}, { status: boolean }> = catchAsync(async (req, res) => {
-
     const result = await userService.status_update_user(req.body, req.params.id)
-
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: 'status updated successfully',
         data: result,
     });
-
 })
+
+
+//add sub admin
+const addSubAdmin = catchAsync(async (req: Request, res: Response) => {
+    const result = await userService.addSubAdmin(req.body);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Sub Admin created successfully',
+        data: result,
+    });
+});
+
+//delete sub admin
+const deleteSubAdmin = catchAsync(async (req: Request, res: Response) => {
+    const result = await userService.deleteSubAdmin(req.params.id);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Sub Admin deleted successfully',
+        data: result,
+    });
+});
+
+//get all subadmin
+const allSubAdmins = catchAsync(async (req: Request, res: Response) => {
+    const result = await userService.allSubAdmins();
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'All subadmins retrived successfully',
+        data: result,
+    });
+});
+
+
 
 export const userController = {
     updateProfile,
@@ -105,5 +153,9 @@ export const userController = {
     all_users,
     deleteSchoolTeacher,
     update_user_status,
-    mySchoolTeachers
+    mySchoolTeachers,
+    updateTeacherById,
+    addSubAdmin,
+    deleteSubAdmin,
+    allSubAdmins
 }

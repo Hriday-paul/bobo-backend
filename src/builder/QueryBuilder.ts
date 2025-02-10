@@ -150,7 +150,7 @@ class QueryBuilder<T> {
         : null;
 
     if (searchTerm) {
-      const regex = new RegExp(searchTerm, 'i'); // Case-insensitive regex
+      const regex = new RegExp(searchTerm, 'i');
       const orConditions = searchableFields.map(field => ({
         [field]: { $regex: regex }
       }));
@@ -193,6 +193,8 @@ class QueryBuilder<T> {
 
   //   return this;
   // }
+
+  
 
   // Filter
   filter() {

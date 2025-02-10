@@ -15,14 +15,20 @@ const create_Package = async (payload: IPackage) => {
     return packages;
 }
 
+const update_Package = async (payload: IPackage, id: string) => {
+    const packages = await Package.updateOne({ _id: id }, payload);
+    return packages;
+}
+
 // get all packeges and filter by plan type
 const getPackages_by_type = async (packageType?: 'standard' | "premium") => {
-    const query = packageType ? { plan_type: packageType, isDeleted : false } : {isDeleted : false};
+    const query = packageType ? { plan_type: packageType, isDeleted: false } : { isDeleted: false };
     const packages = await Package.find(query);
     return packages;
 }
 
 export const packageService = {
     create_Package,
-    getPackages_by_type
+    getPackages_by_type,
+    update_Package
 }

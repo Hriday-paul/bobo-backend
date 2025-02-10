@@ -28,6 +28,15 @@ const auth = (...userRoles: string[]) => {
         if (!isUserExist) {
             throw new AppError(httpStatus.NOT_FOUND, 'user not found');
         }
+
+        if (!isUserExist?.isverified) {
+            throw new AppError(httpStatus.UNAUTHORIZED, 'You are not verifiend');
+        }
+
+        if (isUserExist?.status == 0) {
+            throw new AppError(httpStatus.FORBIDDEN, 'Your account is blocked');
+        }
+
         if (userRoles && !userRoles.includes(role)) {
             throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
         }

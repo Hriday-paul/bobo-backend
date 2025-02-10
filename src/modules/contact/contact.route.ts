@@ -20,7 +20,7 @@ router.post(
 // router.get('/user/:id', contactController.getcontactByUserId);
 // router.get('/:id', contactController.getcontactById);
 router.get('/',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.sub_admin),
   contactController.getAllcontact);
 
 export const contactRoutes = router;
