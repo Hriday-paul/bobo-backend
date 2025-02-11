@@ -6,8 +6,9 @@ import httpStatus from "http-status"
 import Access_comments from "./access_comments.model";
 import { User } from "../user/user.models";
 import AppError from "../../error/AppError";
+import { commentService } from "../comments/comments.service";
 
-const generate_comment = catchAsync(async (req: Request<{}, {}, { feedbackData: any, language: string, cycle: string }>, res: Response) => {
+const generate_comment = catchAsync(async (req: Request, res: Response) => {
 
     let user_Id = req.user._id
 
@@ -34,6 +35,10 @@ const generate_comment = catchAsync(async (req: Request<{}, {}, { feedbackData: 
             $inc: { [`plans.${usedPlan}.comment_generated`]: 1 }
         }
     );
+
+
+    // save my generated comments
+    await commentService.saveGeneratedComment({ cycle: req.body.cycle, language: req.body.language, prompt: req.body.feedbackData, result: result }, req?.user?._id)
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

@@ -8,8 +8,7 @@ export const addSchoolTeacherValidator = [
 ]
 
 export const updateSchoolTeacherValidator = [
-    check('firstName').trim().escape().not().isEmpty().withMessage('firstName is required').isString().isLength({ min: 2 }).withMessage('firstName min length is 2'),
-    check('lastName').trim().escape().not().isEmpty().withMessage('lastName is required').isString().isLength({ min: 2 }).withMessage('lastName min length is 2'),
+    check('name').trim().escape().not().isEmpty().withMessage('name is required').isString().isLength({ min: 2 }).withMessage('name min length is 2'),
     check('status').trim().escape().not().isEmpty().withMessage('status is required').isBoolean().withMessage("status must be boolean"),
 ]
 

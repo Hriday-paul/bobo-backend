@@ -12,6 +12,7 @@ import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
 import { generateOtp } from "../../utils/otpGenerator"
 import moment from "moment"
 import { sendEmail } from "../../utils/mailSender"
+import Access_comments from "../access_comments/access_comments.model"
 
 const createUser = async (payload: IUser) => {
     const { name, email, password, contact = '', job_role = "", school = '', role = "1", school_admin } = payload
@@ -35,6 +36,14 @@ const createUser = async (payload: IUser) => {
         throw new AppError(httpStatus.BAD_REQUEST, 'User creation failed');
     }
 
+    await Access_comments.findOneAndUpdate(
+        { user: user?._id },
+        {
+            $set: { [`plans.free.expiredAt`]: null, [`plans.free.comment_generated`]: 0, [`plans.free.comment_generate_limit`]: 5, [`plans.free.accessCycle`]: 'all', user: user?._id },
+        },
+        { upsert: true },
+    );
+
     return user;
 }
 
@@ -54,6 +63,15 @@ const createGuestUser = async (payload: { email: string }) => {
     }
 
     const user = await User.create({ email, role: '1' });
+
+    await Access_comments.findOneAndUpdate(
+        { user: user?._id },
+        {
+            $set: { [`plans.free.expiredAt`]: null, [`plans.free.comment_generated`]: 0, [`plans.free.comment_generate_limit`]: 5, [`plans.free.accessCycle`]: 'all', user: user?._id },
+        },
+        { upsert: true },
+    );
+
 
     if (!user) {
         throw new AppError(httpStatus.BAD_REQUEST, 'Guest User creation failed');

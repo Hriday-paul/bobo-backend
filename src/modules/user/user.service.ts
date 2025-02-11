@@ -173,7 +173,8 @@ const updateSchoolTeacher = async (payload: { name: string, status: 0 | 1 }, id:
         );
     }
 
-    const user = await User.updateOne({ name: payload.name, status: payload?.status });
+
+    const user = await User.updateOne({ _id: id }, { name: payload.name, status: payload?.status });
 
     if (user?.modifiedCount <= 0) {
         throw new AppError(httpStatus.BAD_REQUEST, 'Teacher update failed');

@@ -9,9 +9,9 @@ import { USER_ROLE } from "../user/user.constants";
 const router = Router();
 
 router.post('/generateFeedback',
-    auth(USER_ROLE.guest_user, USER_ROLE.individual_teacher, USER_ROLE.school_admin, USER_ROLE.school_teacher),
     commentGenerateValidator,
     req_validator(),
+    auth(USER_ROLE.guest_user, USER_ROLE.individual_teacher, USER_ROLE.school_admin, USER_ROLE.school_teacher),
     access_comments_controller.generate_comment)
 
 export const commentRouts = router

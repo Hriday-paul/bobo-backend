@@ -25,8 +25,22 @@ const Access_commentsSchema = new Schema<IAccess_comments>(
             ref: "users",
         },
         plans: {
-            standard: { type: PlanSchema, default: () => ({}) },
-            premium: { type: PlanSchema, default: () => ({}) },
+            standard: {
+                type: PlanSchema, default: () => ({
+                    comment_generate_limit: 0,
+                    comment_generated: 0,
+                    accessCycle: 'all',
+                    expiredAt: new Date(),
+                })
+            },
+            premium: {
+                type: PlanSchema, default: () => ({
+                    comment_generate_limit: 0,
+                    comment_generated: 0,
+                    accessCycle: 'all',
+                    expiredAt: new Date(),
+                })
+            },
             free: {
                 type: PlanSchema, default: () => {
                     return {

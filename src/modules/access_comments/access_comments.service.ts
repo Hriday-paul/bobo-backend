@@ -112,16 +112,17 @@ const checkAccess = async (
     if (!userAccess) {
         throw new AppError(
             httpStatus.NOT_FOUND,
-            'You have not access for generate comment',
+            'You have not any subscription',
         );
     }
 
     let usedPlan = 'premium';
-    let errMsg = ''
 
     //check user role is 1 and his free comment limit is finish or not
     if (role == '1') {
-        if (userAccess.plans.free?.comment_generate_limit && userAccess.plans.free?.comment_generated) {
+
+        if (userAccess.plans.free?.comment_generate_limit || userAccess.plans.free?.comment_generated) {
+
             if (userAccess.plans.free?.comment_generate_limit > userAccess.plans.free?.comment_generated) {
                 usedPlan = 'free'
                 return { usedPlan, accessCycle: 'all' }
@@ -140,7 +141,13 @@ const checkAccess = async (
         }
     }
 
-    if (role == '3' || role == '4') {
+    if (role == '4') {
+        if ((userAccess.plans.premium?.comment_generate_limit || 0) <= 0) {
+            throw new AppError(
+                httpStatus.FORBIDDEN,
+                `You have not any subscription`,
+            );
+        }
         if (userAccess.plans.premium?.expiredAt && (new Date(userAccess.plans.premium?.expiredAt) > new Date())) {
             if (userAccess.plans.premium?.comment_generate_limit > userAccess.plans.premium?.comment_generated) {
                 usedPlan = 'premium'
@@ -159,11 +166,27 @@ const checkAccess = async (
         }
     }
 
+
+    // check user initially purchase a subscription for handle message
+    let msg = ''
+
+    if ((userAccess.plans.standard?.comment_generate_limit || 0) <= 0) {
+        msg = `You have not any subscription`;
+    } else {
+        msg = ''
+    }
+
     // check user have a standard plan with expire date and comment generate limit and he use previous cycle or not
     if (userAccess.plans.standard?.expiredAt && (new Date(userAccess.plans.standard?.expiredAt) > new Date())) {
         if (userAccess.plans.standard?.comment_generate_limit > userAccess.plans.standard?.comment_generated) {
             if ((userAccess.plans.standard?.accessCycle !== 'all')) {
                 if (userAccess.plans.standard?.accessCycle !== cycle) {
+
+                    // check user initially purchase a subscription for handle message
+                    if ((userAccess.plans.premium?.comment_generate_limit || 0) <= 0) {
+                        msg = `You have not any subscription`;
+                    }
+
                     // check user have a premium plan with expire date and comment generate limit
                     if (userAccess.plans.premium?.expiredAt && (new Date(userAccess.plans.premium?.expiredAt) > new Date())) {
                         if (userAccess.plans.premium?.comment_generate_limit > userAccess.plans.premium?.comment_generated) {
@@ -171,6 +194,13 @@ const checkAccess = async (
                             return { usedPlan, accessCycle: 'all' }
                         }
                         else {
+                            // check user initially purchase a subscription for handle message
+                            if (msg) {
+                                throw new AppError(
+                                    httpStatus.FORBIDDEN,
+                                    msg,
+                                );
+                            }
                             throw new AppError(
                                 httpStatus.FORBIDDEN,
                                 `You can access only cycle ${userAccess.plans.standard?.accessCycle}`,
@@ -178,6 +208,7 @@ const checkAccess = async (
                         }
                     }
                     else {
+                        // check user initially purchase a subscription
                         throw new AppError(
                             httpStatus.FORBIDDEN,
                             `You can access only cycle ${userAccess.plans.standard?.accessCycle}`,
@@ -191,7 +222,13 @@ const checkAccess = async (
     }
 
 
-
+    // check user initially purchase a subscription
+    if ((userAccess.plans.premium?.comment_generate_limit || 0) <= 0) {
+        throw new AppError(
+            httpStatus.FORBIDDEN,
+            `You have not any subscription`,
+        );
+    }
     // check user have a premium plan with expire date and comment generate limit
     if (userAccess.plans.premium?.expiredAt && (new Date(userAccess.plans.premium?.expiredAt) > new Date())) {
         if (userAccess.plans.premium?.comment_generate_limit > userAccess.plans.premium?.comment_generated) {

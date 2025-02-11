@@ -3,7 +3,7 @@ import { check } from 'express-validator';
 export const createAccountValidator = [
     check('name').trim().escape().not().isEmpty().withMessage('Name is required').isString().isLength({ min: 2 }).withMessage('Name min length is 2'),
     check('email').trim().escape().not().isEmpty().withMessage('Email is required').isEmail().normalizeEmail({ all_lowercase: true }).withMessage('Invalid Email'),
-    check('contact').optional().trim().escape().isMobilePhone('any').withMessage('Invalid contact number'),
+    check('contact').optional().trim().escape(), //.isMobilePhone('any').withMessage('Invalid contact number')
     check('job_role').optional().trim().escape().isString(),
     check('school').optional().trim().escape().isString(),
     check('password').trim().escape().not().isEmpty().withMessage('password is required').isString(),
