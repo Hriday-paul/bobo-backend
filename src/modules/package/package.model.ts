@@ -20,6 +20,7 @@ const PackageSchema = new Schema<IPackage>(
         isDeleted: { type: Boolean, default: false },
     },
     {
+        _id : true,
         timestamps: true,
     },
 );

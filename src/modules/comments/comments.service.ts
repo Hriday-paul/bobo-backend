@@ -1,4 +1,3 @@
-import { IComment } from "./comments.interface"
 import Comments from "./comments.model"
 
 //create a new Comment

@@ -14,7 +14,7 @@ const createPackage = catchAsync(async (req: Request, res: Response) => {
 })
 
 const updatePackage = catchAsync(async (req: Request, res: Response) => {
-    const result = await packageService.update_Package(req.body, req.body.id)
+    const result = await packageService.update_Package(req.body, req.params.id)
     sendResponse(res, {
         statusCode: 200,
         success: true,

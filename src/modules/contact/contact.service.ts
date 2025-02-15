@@ -7,6 +7,7 @@ import path from 'path';
 import { sendEmail } from '../../utils/mailSender';
 import fs from 'fs';
 import { Contact } from './contact.models';
+import config from '../../config';
 
 const createContact = async (payload: Icontact) => {
 
@@ -16,7 +17,7 @@ const createContact = async (payload: Icontact) => {
   );
   // If 'isApproved' is set to true, send an email
   await sendEmail(
-    payload?.email,
+    config.nodemailer_host_email!,
     'Got a support message from Teachershub',
     fs
       .readFileSync(emailPath, 'utf8')

@@ -16,7 +16,7 @@ const create_Package = async (payload: IPackage) => {
 }
 
 const update_Package = async (payload: IPackage, id: string) => {
-    const packages = await Package.updateOne({ _id: id }, payload);
+    const packages = await Package.updateOne({ _id: id }, {...payload});
     return packages;
 }
 

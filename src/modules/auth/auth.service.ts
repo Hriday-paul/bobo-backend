@@ -381,7 +381,7 @@ const sendEmailRegisterForm = async (email: string, firstName: string, lastName:
         'Teacher Register form link',
         fs
             .readFileSync(otpEmailPath, 'utf8')
-            .replace('{{link}}', (config.client_Url + '/en/schoolAccountAuth/schoolRegister'))
+            .replace('{{link}}', (config.client_Url + '/fr/schoolAccountAuth/schoolRegister'))
             .replace('{{firstName}}', firstName)
             .replace('{{lastName}}', lastName)
     );

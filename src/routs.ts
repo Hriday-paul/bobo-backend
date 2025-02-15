@@ -8,6 +8,7 @@ import { userRoutes } from './modules/user/user.rout';
 import { contactRoutes } from './modules/contact/contact.route';
 import { usercommentRouts } from './modules/comments/comments.rout';
 import { dashboardRouts } from './modules/dasboard/dashboard.rout';
+import { open_api_routs } from './modules/apiKey/apiKey.rout';
 
 const router = express.Router();
 
@@ -47,6 +48,10 @@ const moduleRoutes = [
     {
         path: '/dashboard',
         route: dashboardRouts,
+    },
+    {
+        path: '/openai',
+        route: open_api_routs,
     },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));

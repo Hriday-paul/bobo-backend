@@ -7,6 +7,7 @@ import Access_comments from "./access_comments.model";
 import { User } from "../user/user.models";
 import AppError from "../../error/AppError";
 import { commentService } from "../comments/comments.service";
+import Api_key from "../apiKey/apiKey.model";
 
 const generate_comment = catchAsync(async (req: Request, res: Response) => {
 
@@ -25,7 +26,18 @@ const generate_comment = catchAsync(async (req: Request, res: Response) => {
 
     const { usedPlan, accessCycle } = await access_commentsService.checkAccess(user_Id, req.user.role, req.body.cycle)
 
-    const result = await access_commentsService.generate_comment(req.body);
+
+    //get api key
+    const api_key = await Api_key.findOne({ name: "open_ai" });
+
+    if (!api_key) {
+        throw new AppError(
+            httpStatus.NOT_FOUND,
+            'Api key not found',
+        );
+    }
+
+    const result = await access_commentsService.generate_comment(req.body, api_key?.key);
 
     // incremnt by 1 comment_generated
     await Access_comments.findOneAndUpdate(
@@ -48,6 +60,17 @@ const generate_comment = catchAsync(async (req: Request, res: Response) => {
     });
 })
 
+const getSubscriptionWithExpired_by_7days = catchAsync(async (req: Request, res: Response) => {
+    const user = await access_commentsService.sendReminderEmail()
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'users',
+        data: user,
+    });
+})
+
 export const access_comments_controller = {
-    generate_comment
+    generate_comment,
+    getSubscriptionWithExpired_by_7days
 }
