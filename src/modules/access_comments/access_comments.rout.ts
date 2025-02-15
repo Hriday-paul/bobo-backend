@@ -14,8 +14,8 @@ router.post('/generateFeedback',
     auth(USER_ROLE.guest_user, USER_ROLE.individual_teacher, USER_ROLE.school_admin, USER_ROLE.school_teacher),
     access_comments_controller.generate_comment)
 
-router.get('/all',
+// router.get('/all',
 
-    access_comments_controller.getSubscriptionWithExpired_by_7days)
+//     access_comments_controller.getSubscriptionWithExpired_by_7days)
 
 export const commentRouts = router

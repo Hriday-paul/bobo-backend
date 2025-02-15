@@ -296,51 +296,55 @@ const checkAccess = async (
 
 const sendReminderEmail = async () => {
 
-    const targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() + 7); // Get the date 7 days from today
-    targetDate.setHours(0, 0, 0, 0); // Normalize time to 00:00:00.000
+    try {
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + 7); // Get the date 7 days from today
+        targetDate.setHours(0, 0, 0, 0); // Normalize time to 00:00:00.000
 
-    const nextDay = new Date(targetDate);
-    nextDay.setDate(nextDay.getDate() + 1); // Move to the next day
-    nextDay.setHours(0, 0, 0, 0);
+        const nextDay = new Date(targetDate);
+        nextDay.setDate(nextDay.getDate() + 1); // Move to the next day
+        nextDay.setHours(0, 0, 0, 0);
 
-    // get who has 7 days by plan expiry
-    const users = await Access_comments.find({
-        $or: [
-            { "plans.standard.expiredAt": { $gte: targetDate, $lt: nextDay } },
-            { "plans.premium.expiredAt": { $gte: targetDate, $lt: nextDay } }
-        ]
-    }).populate("user").lean() as unknown as {
-        plans: { standard: { expiredAt: string }, premium: { expiredAt: string } },
-        user: { email: string, name: string, role: number }
-    }[];
+        // get who has 7 days by plan expiry
+        const users = await Access_comments.find({
+            $or: [
+                { "plans.standard.expiredAt": { $gte: targetDate, $lt: nextDay } },
+                { "plans.premium.expiredAt": { $gte: targetDate, $lt: nextDay } }
+            ]
+        }).populate("user").lean() as unknown as {
+            plans: { standard: { expiredAt: string }, premium: { expiredAt: string } },
+            user: { email: string, name: string, role: number }
+        }[];
 
-    const emailPath = path.join(
-        __dirname,
-        '../../public/view/Subscription_reminder.html',
-    );
-
-    // send reminder email all founded users
-    for (const user of users) {
-
-        if (!user.user || !user.user.email) continue; // Skip if user is missing
-
-        let plan;
-
-        if (new Date(user?.plans?.premium?.expiredAt) >= targetDate && new Date(user?.plans?.premium?.expiredAt) <= nextDay) {
-            plan = "Premium";
-        } else {
-            plan = "Standard";
-        }
-
-        await sendEmail(
-            user.user.email,
-            "Subscription Reminder from Teachershub",
-            fs.readFileSync(emailPath, "utf8")
-                .replace("{{plan}}", plan)
-                .replace("{{current_plan}}", plan)
-                .replace("{{renew_link}}", user?.user?.role == 3 ? `${config.client_Url}/subsCriptionManagement` : `${config.client_Url}/subscriptionDetails`)
+        const emailPath = path.join(
+            __dirname,
+            '../../public/view/Subscription_reminder.html',
         );
+
+        // send reminder email all founded users
+        for (const user of users) {
+
+            if (!user.user || !user.user.email) continue; // Skip if user is missing
+
+            let plan;
+
+            if (new Date(user?.plans?.premium?.expiredAt) >= targetDate && new Date(user?.plans?.premium?.expiredAt) <= nextDay) {
+                plan = "Premium";
+            } else {
+                plan = "Standard";
+            }
+
+            await sendEmail(
+                user.user.email,
+                "Subscription Reminder from Teachershub",
+                fs.readFileSync(emailPath, "utf8")
+                    .replace("{{plan}}", plan)
+                    .replace("{{current_plan}}", plan)
+                    .replace("{{renew_link}}", user?.user?.role == 3 ? `${config.client_Url}/subsCriptionManagement` : `${config.client_Url}/subscriptionDetails`)
+            );
+        }
+    } catch (err) {
+        console.error('Error running daily job:', err);
     }
 
     console.log("reminder job completed")
