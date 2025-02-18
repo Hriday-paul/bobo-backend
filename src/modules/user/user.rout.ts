@@ -85,6 +85,13 @@ router.get(
     userController.mySchoolTeachers,
 );
 
+// --------------school teachers by school admin-------------
+router.get(
+    '/school-teachers/:id',
+    auth(USER_ROLE.school_admin, USER_ROLE.admin),
+    userController.SchoolTeachers,
+);
+
 
 router.get(
     '/subadmin',

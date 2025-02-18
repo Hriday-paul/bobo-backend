@@ -88,6 +88,18 @@ const deleteSchoolTeacher = catchAsync(async (req: Request, res: Response) => {
     });
 })
 
+// schoola dmin all teachers
+const SchoolTeachers = catchAsync(async (req: Request, res: Response) => {
+    const query = req.query
+    const result = await userService.mySchoolTeachers(query, req.params.id)
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'School Teacher get successfully',
+        data: result,
+    });
+})
+
 const mySchoolTeachers = catchAsync(async (req: Request, res: Response) => {
     const query = req.query
     const result = await userService.mySchoolTeachers(query, req.user._id)
@@ -153,6 +165,7 @@ export const userController = {
     all_users,
     deleteSchoolTeacher,
     update_user_status,
+    SchoolTeachers,
     mySchoolTeachers,
     updateTeacherById,
     addSubAdmin,

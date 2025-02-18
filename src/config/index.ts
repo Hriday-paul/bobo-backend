@@ -24,6 +24,7 @@ export default {
   database_url: process.env.DATABASE_URL,
   server_url: process.env.SERVER_URL,
   client_Url: process.env.CLIENT_URL,
+  client_Root_Url: process.env.CLIENT_ROOT_URL,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
   jwt_access_secret: process.env.JWT_ACCESS_SECRET,
   jwt_refresh_secret: process.env.JWT_REFRESH_SECRET,
